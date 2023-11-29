@@ -1,17 +1,17 @@
 from tkinter import *
+from queries import *
 import mysql.connector
 
 root = Tk()
 root.title("Music Manager")
 root.geometry("700x400")
 
-# db = mysql.connector.connect(
-#     host="localhost",
-#     user="root",
-#     passwd="kunjm@41",
-#     database="Music"
-# )
-# cursor = db.cursor()
+db = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    passwd="kunjm@41",
+    database="Music"
+)
 
 
 def add_song():
@@ -25,8 +25,8 @@ def add_song():
     name_frame = Frame(root)
     name_label = Label(name_frame, text="Name", font=('Arial', 24))
     name_label.grid(row=0, column=0, padx=20, pady=20)
-    name_button = Entry(name_frame, font=('Arial', 15))
-    name_button.grid(row=0, column=1, padx=20, pady=10)
+    name_entry = Entry(name_frame, font=('Arial', 15))
+    name_entry.grid(row=0, column=1, padx=20, pady=10)
     name_frame.pack()
 
     # album
@@ -34,7 +34,7 @@ def add_song():
     name_label = Label(album_frame, text="Album", font=('Arial', 24))
     name_label.grid(row=0, column=0, padx=20, pady=20)
 
-    album_options = ['kohinoor', 'kal ho na ho', 'pk']  # query album names
+    album_options = fetch_albums(db)
     selected_album_options = StringVar()
     selected_album_options.set(album_options[0])
     select_album = OptionMenu(album_frame, selected_album_options, *album_options)
@@ -48,7 +48,7 @@ def add_song():
     name_label = Label(genre_frame, text="Genre", font=('Arial', 24))
     name_label.grid(row=0, column=0, padx=20, pady=20)
 
-    genre_options = ['hip hop', 'romantic', 'pop']  # query album names
+    genre_options = fetch_genres(db)
     selected_genre_options = StringVar()
     selected_genre_options.set(genre_options[0])
     select_genre = OptionMenu(genre_frame, selected_genre_options, *genre_options)
@@ -58,8 +58,14 @@ def add_song():
     genre_frame.pack()
 
     # submit
+    def submit():
+        name = name_entry.get()
+        album = selected_album_options.get().split()[0]
+        genre = selected_genre_options.get().split()[0][1]
+        add_song_query(db, name, album, genre)
+        home()
     submit_frame = Frame(root)
-    submit_button = Button(submit_frame, text='Submit', font=('Arial', 15))
+    submit_button = Button(submit_frame, text='Submit', font=('Arial', 15), command=submit)
     submit_button.grid(row=0, column=0, padx=20, pady=25)
 
     cancel_button = Button(submit_frame, text='Cancel', font=('Arial', 15), command=home)
@@ -78,8 +84,8 @@ def add_album():
     name_frame = Frame(root)
     name_label = Label(name_frame, text="Name", font=('Arial', 24))
     name_label.grid(row=0, column=0, padx=20, pady=20)
-    name_button = Entry(name_frame, font=('Arial', 15))
-    name_button.grid(row=0, column=1, padx=20, pady=10)
+    name_entry = Entry(name_frame, font=('Arial', 15))
+    name_entry.grid(row=0, column=1, padx=20, pady=10)
     name_frame.pack()
 
     # singer
@@ -87,7 +93,7 @@ def add_album():
     name_label = Label(singer_frame, text="Singer", font=('Arial', 24))
     name_label.grid(row=0, column=0, padx=20, pady=20)
 
-    singer_options = ['kohinoor', 'kal ho na ho', 'pk']  # query singer names
+    singer_options = fetch_singers(db)  # query singer names
     selected_singer_options = StringVar()
     selected_singer_options.set(singer_options[0])
     select_singer = OptionMenu(singer_frame, selected_singer_options, *singer_options)
@@ -97,8 +103,13 @@ def add_album():
     singer_frame.pack()
 
     # submit
+    def submit():
+        name = name_entry.get()
+        singer = selected_singer_options.get().split()[0]
+        add_album_query(db, name, singer)
+        home()
     submit_frame = Frame(root)
-    submit_button = Button(submit_frame, text='Submit', font=('Arial', 15))
+    submit_button = Button(submit_frame, text='Submit', font=('Arial', 15), command=submit)
     submit_button.grid(row=0, column=0, padx=20, pady=25)
 
     cancel_button = Button(submit_frame, text='Cancel', font=('Arial', 15), command=home)
@@ -117,8 +128,8 @@ def add_singer():
     name_frame = Frame(root)
     name_label = Label(name_frame, text="Name", font=('Arial', 24))
     name_label.grid(row=0, column=0, padx=20, pady=20)
-    name_button = Entry(name_frame, font=('Arial', 15))
-    name_button.grid(row=0, column=1, padx=20, pady=10)
+    name_entry = Entry(name_frame, font=('Arial', 15))
+    name_entry.grid(row=0, column=1, padx=20, pady=10)
     name_frame.pack()
 
     # gender
@@ -135,8 +146,13 @@ def add_singer():
     gender_frame.pack()
 
     # submit
+    def submit():
+        name = name_entry.get()
+        gender = gender_var.get()
+        add_singer_query(db, name, gender)
+        home()
     submit_frame = Frame(root)
-    submit_button = Button(submit_frame, text='Submit', font=('Arial', 15))
+    submit_button = Button(submit_frame, text='Submit', font=('Arial', 15), command=submit)
     submit_button.grid(row=0, column=0, padx=20, pady=25)
 
     cancel_button = Button(submit_frame, text='Cancel', font=('Arial', 15), command=home)
@@ -330,4 +346,4 @@ def edit_song():
 
 home()
 root.mainloop()
-# db.close()
+db.close()

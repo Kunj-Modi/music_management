@@ -33,3 +33,17 @@ select * from Songs;
 select * from Albums;
 select * from Genres;
 select * from Singers;
+
+ALTER TABLE Singers
+ADD COLUMN dob DATE,
+ADD COLUMN gender ENUM('Male', 'Female');
+
+ALTER TABLE Singers
+DROP COLUMN dob;
+
+ALTER TABLE Albums MODIFY COLUMN album_year INT;
+
+insert INTO Genres (genre_name) VALUES ('Hip Hop');
+insert INTO Genres (genre_name) VALUES ('Romantin');
+insert INTO Genres (genre_name) VALUES ('Pop');
+insert INTO Genres (genre_name) VALUES ('Country')
