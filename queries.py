@@ -1,7 +1,7 @@
 from datetime import datetime, date
 
 
-def fetch_singers(db):
+def fetch_singers_query(db):
     cursor = db.cursor()
     sql = "SELECT * FROM Singers"
     cursor.execute(sql)
@@ -12,7 +12,7 @@ def fetch_singers(db):
     return singers
 
 
-def fetch_albums(db):
+def fetch_albums_query(db):
     cursor = db.cursor()
     sql = "SELECT * FROM Albums"
     cursor.execute(sql)
@@ -23,7 +23,7 @@ def fetch_albums(db):
     return albums
 
 
-def fetch_genres(db):
+def fetch_genres_query(db):
     cursor = db.cursor()
     sql = "SELECT * FROM Genres"
     cursor.execute(sql)
@@ -31,7 +31,85 @@ def fetch_genres(db):
     genres = []
     for genre in genres_data:
         genres.append(f'{genre[0]} {genre[1]}')
-    return genres_data
+    return genres
+
+
+def fetch_songs_query(db, using, name):
+    cursor = db.cursor()
+    if using == 'Song name':
+        sql = f"SELECT song_id, song_name FROM Songs WHERE song_name LIKE '%{name.strip()}%'"
+    else:
+        if using == 'Singer':
+            sql = f"""
+                SELECT Songs.song_id, Songs.song_name
+                FROM Singers 
+                INNER JOIN Albums ON Singers.singer_id = Albums.singer_id 
+                INNER JOIN Songs ON Albums.album_id = Songs.album_id 
+                WHERE Singers.singer_name LIKE '%{name.strip()}%'
+            """
+        else:
+            sql = f"""
+                SELECT Songs.song_id, Songs.song_name
+                FROM Songs
+                INNER JOIN {using+'s'} ON Songs.album_id = {using+'s'}.{using.lower()}_id
+                WHERE {using+'s'}.{using.lower()}_name LIKE '%{name.strip()}%'
+            """
+    cursor.execute(sql)
+    songs_data = cursor.fetchall()
+    songs = []
+    for song in songs_data:
+        songs.append(f'{song[0]} {song[1]}')
+    return songs
+
+
+def fetch_song_query(db, song_id):
+    cursor = db.cursor()
+    sql = f"""
+            SELECT 
+                Songs.song_name, 
+                Songs.song_date, 
+                Albums.album_name,
+                Singers.singer_name, 
+                Genres.genre_name,
+                Albums.album_id,
+                Genres.genre_id
+            FROM Songs
+            INNER JOIN Albums ON Songs.album_id = Albums.album_id
+            INNER JOIN Singers ON Albums.singer_id = Singers.singer_id
+            INNER JOIN Genres ON Songs.genre_id = Genres.genre_id
+            WHERE Songs.song_id = {song_id}
+        """
+    cursor.execute(sql)
+    song_data = cursor.fetchall()
+    return song_data[0]
+
+
+def edit_song_query(db, song_id, change: dict):
+    cursor = db.cursor()
+
+    sql = "UPDATE songs SET album_id = %s, genre_id = %s WHERE song_id = %s"
+
+    values = (change['album_id'], change['genre_id'], song_id)
+
+    cursor.execute(sql, values)
+
+    db.commit()
+
+    cursor.close()
+
+
+def delete_song_query(db, song_id):
+    cursor = db.cursor()
+
+    sql = "DELETE FROM songs WHERE song_id = %s"
+
+    values = (song_id,)
+
+    cursor.execute(sql, values)
+
+    db.commit()
+
+    cursor.close()
 
 
 def add_singer_query(db, name, gender):
