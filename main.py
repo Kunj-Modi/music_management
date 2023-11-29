@@ -13,8 +13,6 @@ db = mysql.connector.connect(
     database="Music"
 )
 
-songs_list = []
-
 
 def add_song():
     for widget in root.winfo_children():
@@ -236,7 +234,7 @@ def song_list(using, name):
         delete_button = Button(frame, text='Delete', font=('Arial', 15), command=lambda: delete(song_id))
         delete_button.grid(row=0, column=3, padx=20, pady=25)
 
-    for i, song in enumerate(songs):
+    for song in songs:
         frame = Frame(root)
 
         cur_song_id = song.strip()[0]
